@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#5a7d4f">
+<title>Le Parcours · Dessin & 3 visions</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+  :root{
+    --paper:#f3e9d2; --paper2:#fbf5e6; --ink:#2a2723; --muted:#8a7f6b;
+    --line:#d9cba8; --red:#c0392b; --green:#5a7d4f; --ochre:#b3793a;
+    --blue:#3d6b8e; --purple:#6d5a8c;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif; color:var(--ink);
+    background:
+      radial-gradient(circle at 20% 8%, rgba(255,255,255,.5), transparent 40%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.012) 0 1px, transparent 1px 26px),
+      var(--paper);
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:520px; margin:0 auto; padding:18px 16px 56px;}
+  a{color:inherit;}
+
+  .nav{display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:10px;}
+  .nav a{color:var(--muted); text-decoration:none; font-weight:600;}
+  .kicker{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:600;}
+  h1{font-family:'Caveat',cursive; font-size:50px; line-height:.95; margin:2px 0 6px;}
+  .sub{color:var(--muted); font-size:14.5px; line-height:1.5; margin:0 0 14px;}
+
+  /* cockpit bar */
+  .cockpit{background:var(--paper2); border:1px solid var(--line); border-radius:16px; padding:15px 16px; margin:12px 0 18px; box-shadow:0 2px 0 rgba(0,0,0,.04);}
+  .rankline{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .rank{font-family:'Caveat',cursive; font-size:28px; line-height:1;}
+  .pct{font-size:13px; color:var(--muted); font-weight:600;}
+  .bar{height:12px; border-radius:8px; background:#e7dcc0; overflow:hidden;}
+  .bar > i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--green),var(--ochre)); border-radius:8px; transition:width .5s;}
+  .cockrow{display:flex; gap:10px; margin-top:13px;}
+  .cockrow button{flex:1; font-family:inherit; font-weight:700; font-size:14px; padding:12px; border-radius:12px; border:none; cursor:pointer;}
+  .b-streak{background:var(--green); color:#fff; box-shadow:0 3px 0 #3f5a37;}
+  .b-streak:active{transform:translateY(2px); box-shadow:0 1px 0 #3f5a37;}
+  .b-quest{background:var(--ink); color:#fff; box-shadow:0 3px 0 #000;}
+  .b-quest:active{transform:translateY(2px); box-shadow:0 1px 0 #000;}
+  .streakinfo{text-align:center; font-size:12.5px; color:var(--muted); margin-top:9px; font-weight:600;}
+  .streakinfo b{color:var(--ochre); font-size:14px;}
+
+  /* branches */
+  .branch{margin:22px 0 8px;}
+  .branch-h{display:flex; align-items:center; gap:9px; margin:0 0 4px;}
+  .branch-h .dotc{width:13px; height:13px; border-radius:50%;}
+  .branch-h h2{font-family:'Caveat',cursive; font-size:30px; margin:0; line-height:1;}
+  .branch-sub{font-size:12.5px; color:var(--muted); margin:0 0 12px 22px;}
+
+  .mod{border:1.5px solid var(--line); border-left-width:5px; border-radius:14px; background:var(--paper2); padding:13px 14px; margin:9px 0; box-shadow:0 2px 0 rgba(0,0,0,.04); cursor:pointer;}
+  .mod.done{background:#f1f4ea; border-left-color:var(--green)!important;}
+  .mod .top{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .mod .code{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700;}
+  .mod h3{font-size:16px; margin:3px 0 0; line-height:1.25;}
+  .mod.done h3{text-decoration:line-through; text-decoration-color:var(--green); text-decoration-thickness:2px;}
+  .pill{flex:none; font-size:11px; font-weight:700; padding:5px 10px; border-radius:20px; white-space:nowrap;}
+  .pill.todo{background:#e7dcc0; color:var(--muted);}
+  .pill.doing{background:#f6e2c4; color:var(--ochre);}
+  .pill.done{background:#d8e6cd; color:var(--green);}
+  .mod .goal{font-size:13.5px; line-height:1.45; margin:8px 0 0; color:#4a443b;}
+  .mod .ex{font-size:13px; line-height:1.45; margin:9px 0 0; padding-top:9px; border-top:1px dashed var(--line);}
+  .mod .ex .t{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700;}
+  .mod .res{display:inline-block; margin-top:9px; font-size:12.5px; font-weight:700; color:var(--blue); text-decoration:none;}
+  .mod .res:after{content:" \2197";}
+  .mod.flash{animation:fl 1.4s;}
+  @keyframes fl{0%,100%{box-shadow:0 2px 0 rgba(0,0,0,.04);}30%{box-shadow:0 0 0 3px var(--ochre);}}
+
+  .hint{font-size:11.5px; color:var(--muted); text-align:center; margin:14px 0 0; font-style:italic;}
+
+  /* resources */
+  details.resbox{background:var(--paper2); border:1px solid var(--line); border-radius:14px; margin:18px 0 0; overflow:hidden;}
+  details.resbox summary{padding:14px 16px; font-weight:700; font-size:15px; list-style:none; cursor:pointer;}
+  details.resbox summary::-webkit-details-marker{display:none;}
+  .reslist{padding:0 16px 14px; font-size:13.5px; line-height:1.5;}
+  .reslist h4{margin:12px 0 4px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+  .reslist a{color:var(--blue); font-weight:600;}
+  .reslist p{margin:5px 0;}
+
+  footer{text-align:center; color:var(--muted); font-size:11.5px; margin-top:24px; line-height:1.6;}
+  footer a{color:var(--ochre); font-weight:700; text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="nav">
+    <a href="index.html">&larr; La carte (séance)</a>
+    <a href="PLAN_WEEKEND.md">Le plan du week-end</a>
+  </div>
+
+  <div class="kicker">Plateforme d'apprentissage · dessin</div>
+  <h1>Le Parcours</h1>
+  <p class="sub">Tout le chemin, des premières lignes à la 3ème vision en mouvement. Avance dans l'ordre ou en sautant : chaque module est une quête courte, avec sa ressource et son exercice. Touche un module pour le faire passer de « à faire » à « en cours » puis « validé ».</p>
+
+  <div class="cockpit">
+    <div class="rankline">
+      <span class="rank" id="rank">Apprenti</span>
+      <span class="pct" id="pct">0 / 0 validés</span>
+    </div>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="cockrow">
+      <button class="b-streak" id="streakBtn">J'ai dessiné aujourd'hui</button>
+      <button class="b-quest" id="questBtn">Quête du jour</button>
+    </div>
+    <div class="streakinfo" id="streakInfo">Série : <b>0</b> jour. Le but, c'est la régularité, pas la durée.</div>
+  </div>
+
+  <div id="tree"></div>
+
+  <p class="hint" id="hint">Astuce : un bâtiment, 15 minutes, chaque jour. Le reste se greffe dessus.</p>
+
+  <details class="resbox">
+    <summary>Toutes les ressources, au même endroit</summary>
+    <div class="reslist">
+      <h4>Les deux vidéos colonne vertébrale</h4>
+      <p>Perspective et croquis d'archi : <a href="https://www.youtube.com/watch?v=vs9f9shBpNI" target="_blank" rel="noopener">TobySketchLoose, « How to Draw Perspective »</a></p>
+      <p>Le déclic, dessiner à l'envers : <a href="https://www.youtube.com/watch?v=y2lgutQ0HLg" target="_blank" rel="noopener">The Virtual Instructor, « The Drawing Exercise that Changed My Life »</a> (méthode Betty Edwards)</p>
+      <h4>L'outil de séance</h4>
+      <p><a href="index.html">La carte de mission « Réhabilitation »</a> : les trois passes chronométrées.</p>
+      <h4>Apprendre en autodidacte (l'esprit)</h4>
+      <p><a href="https://youtu.be/Q-dwoJ0W9sw" target="_blank" rel="noopener">Vidéo démarche autodidacte</a> (observer puis reproduire, à la Kéré).</p>
+      <h4>Lectures, dans l'ordre</h4>
+      <p>Patrick Bouchain, <i>Construire autrement</i> (Actes Sud, 2006). Prioritaire, se lit en 2 h.</p>
+      <p>Peter Zumthor, <i>Penser l'architecture</i>. Juhani Pallasmaa, <i>The Eyes of the Skin</i>. Lacaton &amp; Vassal, <i>Freedom of use</i>.</p>
+      <h4>Matière et climat (côté projet rénovation)</h4>
+      <p><a href="https://www.editionsladecouverte.fr/materiaux_un_catalogue_critique-9782348085796" target="_blank" rel="noopener">Matériaux, un catalogue critique</a> (La Découverte). <a href="https://terreurbaine.com/habiter-un-climat/" target="_blank" rel="noopener">Terre Urbaine, Habiter un climat</a>.</p>
+      <h4>Outils de repérage (le bâtiment réel)</h4>
+      <p>Géoportail de l'urbanisme (le PLU de la parcelle), DVF (les prix de vente réels).</p>
+    </div>
+  </details>
+
+  <footer>
+    Le Parcours · une page de ton cockpit dessin.<br>
+    Reviens à <a href="index.html">la carte</a> pour lancer une séance.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var BRANCHES = [
+    { id:"main", title:"1 · La main", color:"var(--green)", sub:"Le geste, avant tout le reste.",
+      modules:[
+        { id:"m11", code:"1.1", title:"Délier le poignet", goal:"Perdre la peur de la page blanche. Le geste avant le résultat.",
+          ex:"2 minutes de gribouillage par jour, dont 30 s avec la mauvaise main.", res:null },
+        { id:"m12", code:"1.2", title:"Formes et lignes", goal:"Tracer un trait franc sans trembler, fermer une forme d'un geste.",
+          ex:"Une page de cubes et d'ellipses en freehand, à l'encre, sans gommer.", res:null },
+        { id:"m13", code:"1.3", title:"Le contour aveugle", goal:"Regarder l'objet, pas la feuille. Capter l'énergie, pas les détails.",
+          ex:"Dessine ta main sans jamais regarder le papier, un seul trait continu.", res:null }
+      ]},
+    { id:"espace", title:"2 · L'espace", color:"var(--blue)", sub:"Perspective et croquis d'architecture.",
+      modules:[
+        { id:"m21", code:"2.1", title:"La perspective simple", goal:"Poser une ligne d'horizon et un point de fuite, et t'y tenir.",
+          ex:"Une rue en un point de fuite, à main levée.", res:{label:"TobySketchLoose, perspective", url:"https://www.youtube.com/watch?v=vs9f9shBpNI"} },
+        { id:"m22", code:"2.2", title:"Le bâtiment sur le motif", goal:"Croquer un vrai bâtiment en 10 minutes, debout ou assis devant.",
+          ex:"Assieds-toi devant un immeuble, carnet, 10 min chrono.", res:null },
+        { id:"m23", code:"2.3", title:"Lire un bâtiment", goal:"Voir la structure : niveaux, rythme des ouvertures, toiture, retraits.",
+          ex:"Reprends un croquis et annote ce que tu vois vraiment.", res:null }
+      ]},
+    { id:"declic", title:"3 · Le déclic", color:"var(--ochre)", sub:"Court-circuiter le cerveau symbolique.",
+      modules:[
+        { id:"m31", code:"3.1", title:"L'exercice à l'envers", goal:"Dessiner des formes, pas des noms. La méthode qui change tout.",
+          ex:"Un portrait ou une photo retournée à 180°, 20 minutes.", res:{label:"The Virtual Instructor, à l'envers", url:"https://www.youtube.com/watch?v=y2lgutQ0HLg"} },
+        { id:"m32", code:"3.2", title:"Les trois passes", goal:"Faire P1 ressenti, P2 cliché, P3 preuves sur un même bâtiment.",
+          ex:"Une séance punch complète, guidée par la carte.", res:{label:"Lancer la carte de mission", url:"index.html"} }
+      ]},
+    { id:"vision", title:"4 · La 3ème vision", color:"var(--red)", sub:"Récit, biais, et mouvement.",
+      modules:[
+        { id:"m41", code:"4.1", title:"Mesurer son biais", goal:"Comparer P2 et P3, compter les charges abandonnées. L'écart, c'est le filtre.",
+          ex:"La révélation de la carte, entoure en rouge, compte le score.", res:null },
+        { id:"m42", code:"4.2", title:"Le verdict au calque", goal:"Dessiner les vecteurs de transformation. La 3ème vision en mouvement.",
+          ex:"Sur calque, par-dessus la P3 : 3 flèches, garder, retirer, ajouter.", res:null },
+        { id:"m43", code:"4.3", title:"Le sujet chaud", goal:"Tenir la 3ème vision sur un sujet brûlant, pas juste un bâtiment.",
+          ex:"Les trois passes sur une scène de salle de sport, depuis une photo.", res:null }
+      ]},
+    { id:"culture", title:"5 · La culture", color:"var(--purple)", sub:"Nourrir le regard pour avoir quoi raconter.",
+      modules:[
+        { id:"m51", code:"5.1", title:"Bouchain", goal:"Entrer dans un bâtiment avant de le concevoir, construire avec les gens.",
+          ex:"Lire « Construire autrement » (2 h) et noter 3 idées qui te parlent.", res:null },
+        { id:"m52", code:"5.2", title:"Kéré", goal:"Observer le réel, reproduire et innover. La beauté est un droit.",
+          ex:"Regarder son discours Pritzker 2022 et noter 1 emprunt concret.", res:null },
+        { id:"m53", code:"5.3", title:"Le regard long", goal:"Une lecture d'architecture par mois pour épaissir l'œil.",
+          ex:"Choisis : Zumthor, Pallasmaa, ou Lacaton & Vassal. Une par mois.", res:null },
+        { id:"m54", code:"5.4", title:"Le terrain", goal:"Apprendre du réel : visiter, lire des dossiers de permis publics.",
+          ex:"Une sortie carnet en main, ou la lecture d'un permis en ligne.", res:null }
+      ]}
+  ];
+
+  var RANKS = [
+    { min:0,   name:"Apprenti" },
+    { min:0.01,name:"Arpenteur du trait" },
+    { min:0.30,name:"Œil qui s'ouvre" },
+    { min:0.55,name:"Enquêteur des formes" },
+    { min:0.80,name:"Conteur de la 3ème vision" },
+    { min:1.00,name:"Architecte du récit" }
+  ];
+
+  var ALL = [];
+  BRANCHES.forEach(function(b){ b.modules.forEach(function(m){ ALL.push(m.id); }); });
+
+  // ---- state ----
+  var KEY="parcours_dessin_v1", SKEY="parcours_streak_v1";
+  var status = load(KEY) || {};
+  var streak = load(SKEY) || { count:0, last:null };
+
+  function load(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+  function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function st(id){ return status[id] || "todo"; }
+
+  // ---- render tree ----
+  function render(){
+    var html="";
+    BRANCHES.forEach(function(b){
+      html += '<div class="branch">';
+      html += '<div class="branch-h"><span class="dotc" style="background:'+b.color+'"></span><h2>'+b.title+'</h2></div>';
+      html += '<p class="branch-sub">'+b.sub+'</p>';
+      b.modules.forEach(function(m){
+        var s = st(m.id);
+        var pillTxt = s==="done" ? "validé" : (s==="doing" ? "en cours" : "à faire");
+        html += '<div class="mod '+(s==="done"?"done":"")+'" data-id="'+m.id+'" style="border-left-color:'+b.color+'" id="card-'+m.id+'">';
+        html +=   '<div class="top"><div><span class="code">Module '+m.code+'</span><h3>'+m.title+'</h3></div>';
+        html +=   '<span class="pill '+s+'">'+pillTxt+'</span></div>';
+        html +=   '<p class="goal">'+m.goal+'</p>';
+        html +=   '<div class="ex"><span class="t">Exercice</span><br>'+m.ex+'</div>';
+        if(m.res){ html += '<a class="res" href="'+m.res.url+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+m.res.label+'</a>'; }
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+    document.getElementById("tree").innerHTML = html;
+    document.querySelectorAll(".mod").forEach(function(el){
+      el.addEventListener("click", function(){ cycle(el.dataset.id); });
+    });
+    updateCockpit();
+  }
+
+  function cycle(id){
+    var s = st(id);
+    status[id] = s==="todo" ? "doing" : (s==="doing" ? "done" : "todo");
+    save(KEY, status);
+    render();
+  }
+
+  function updateCockpit(){
+    var done = ALL.filter(function(id){ return st(id)==="done"; }).length;
+    var total = ALL.length;
+    var frac = total ? done/total : 0;
+    var rank = RANKS[0].name;
+    RANKS.forEach(function(r){ if(frac >= r.min) rank = r.name; });
+    document.getElementById("rank").textContent = rank;
+    document.getElementById("pct").textContent = done + " / " + total + " validés";
+    document.getElementById("barfill").style.width = Math.round(frac*100) + "%";
+    renderStreak();
+  }
+
+  // ---- streak ----
+  function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+  function yesterdayStr(){ var d=new Date(); d.setDate(d.getDate()-1); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+  function renderStreak(){
+    var n = streak.count||0;
+    var msg = n===0 ? "Série : <b>0</b> jour. Le but, c'est la régularité, pas la durée."
+            : "Série : <b>"+n+"</b> jour"+(n>1?"s":"")+" d'affilée. Ne casse pas la chaîne.";
+    document.getElementById("streakInfo").innerHTML = msg;
+    document.getElementById("streakBtn").textContent = (streak.last===todayStr()) ? "Dessiné, à demain" : "J'ai dessiné aujourd'hui";
+  }
+  function markToday(){
+    var t = todayStr();
+    if(streak.last === t) return;
+    streak.count = (streak.last === yesterdayStr()) ? (streak.count||0)+1 : 1;
+    streak.last = t;
+    save(SKEY, streak);
+    renderStreak();
+  }
+
+  // ---- quête du jour ----
+  function quest(){
+    var pending = ALL.filter(function(id){ return st(id)!=="done"; });
+    if(!pending.length){ document.getElementById("hint").textContent = "Tout est validé. Refais une passe sur un sujet chaud, ou recommence un module pour le plaisir."; return; }
+    var id = pending[Math.floor(Math.random()*pending.length)];
+    var card = document.getElementById("card-"+id);
+    card.scrollIntoView({behavior:"smooth", block:"center"});
+    card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+  }
+
+  document.getElementById("streakBtn").addEventListener("click", markToday);
+  document.getElementById("questBtn").addEventListener("click", quest);
+
+  render();
+})();
+</script>
+</body>
+</html>
