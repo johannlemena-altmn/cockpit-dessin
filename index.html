@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#c0392b">
+<title>Réhabilitation · carte de mission</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --paper:#f3e9d2; --paper2:#fbf5e6; --ink:#2a2723; --muted:#8a7f6b;
+    --line:#d9cba8; --red:#c0392b; --green:#5a7d4f; --ochre:#b3793a;
+    --blue:#3d6b8e;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,.5), transparent 40%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.012) 0 1px, transparent 1px 26px),
+      var(--paper);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:480px; margin:0 auto; padding:18px 16px 56px;}
+  .hidden{display:none !important;}
+
+  .kicker{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:600;}
+  h1{font-family:'Caveat',cursive; font-size:54px; line-height:.95; margin:2px 0 6px; letter-spacing:.5px;}
+  h2{font-family:'Caveat',cursive; font-size:34px; margin:0 0 6px;}
+  .sub{color:var(--muted); font-size:14.5px; line-height:1.5; margin:0 0 14px;}
+
+  .frame{background:var(--paper2); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin:14px 0; box-shadow:0 2px 0 rgba(0,0,0,.04);}
+  .frame p{margin:0 0 8px; font-size:14.5px; line-height:1.5;}
+  .frame p:last-child{margin-bottom:0;}
+  .rule{display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.45; margin:7px 0;}
+  .rule b{display:inline-flex; min-width:22px; height:22px; align-items:center; justify-content:center; border-radius:50%; background:var(--ink); color:var(--paper2); font-size:12px; font-weight:700; flex:none; margin-top:1px;}
+
+  button{font-family:inherit; cursor:pointer; border:none;}
+  .btn{display:block; width:100%; background:var(--red); color:#fff; font-size:18px; font-weight:700; padding:16px; border-radius:14px; box-shadow:0 3px 0 #8c2a1f; margin:10px 0; transition:transform .05s;}
+  .btn:active{transform:translateY(2px); box-shadow:0 1px 0 #8c2a1f;}
+  .btn.ghost{background:transparent; color:var(--ink); border:1.5px solid var(--line); box-shadow:none; font-size:15px; padding:13px; font-weight:600;}
+  .btn.dark{background:var(--ink); box-shadow:0 3px 0 #000;}
+  .btn.green{background:var(--green); box-shadow:0 3px 0 #3f5a37;}
+  .btn.small{font-size:14px; padding:11px; width:auto; display:inline-block;}
+
+  /* dice / twist */
+  .die{background:var(--paper2); border:1.5px dashed var(--ochre); border-radius:14px; padding:13px 14px; margin:12px 0;}
+  .die .lab{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ochre); font-weight:700;}
+  .die .val{font-size:15px; line-height:1.4; margin-top:5px; min-height:21px; font-weight:500;}
+  .die.shake{animation:shk .4s;}
+  @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px) rotate(-1deg)}40%{transform:translateX(5px) rotate(1deg)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+  /* accordion */
+  details{background:var(--paper2); border:1px solid var(--line); border-radius:14px; margin:10px 0; overflow:hidden;}
+  summary{padding:14px 16px; font-weight:700; font-size:15px; list-style:none; display:flex; justify-content:space-between; align-items:center;}
+  summary::-webkit-details-marker{display:none;}
+  summary .chev{color:var(--muted); transition:transform .2s;}
+  details[open] summary .chev{transform:rotate(90deg);}
+  details .body{padding:0 16px 16px; font-size:14px; line-height:1.55;}
+  details .body ol{margin:8px 0 0; padding-left:20px;}
+  details .body li{margin:6px 0;}
+
+  /* session */
+  .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .topbar .step-no{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700;}
+  .dots{display:flex; gap:6px;}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--line);}
+  .dot.on{background:var(--ink);}
+  .dot.done{background:var(--green);}
+
+  .stepcard{border:1.5px solid var(--accent,#999); border-radius:18px; padding:18px 16px 20px; background:var(--paper2); box-shadow:0 3px 0 rgba(0,0,0,.05);}
+  .role{font-size:12px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--accent,#999);}
+  .stepcard h2{margin:4px 0 12px; color:var(--ink);}
+  .block{margin:12px 0;}
+  .block .t{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:3px;}
+  .block .c{font-size:15px; line-height:1.5;}
+  .block.geste .c{font-weight:600;}
+
+  .timerwrap{display:flex; flex-direction:column; align-items:center; margin:14px 0 4px;}
+  .ring{position:relative; width:172px; height:172px;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring .num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring .num .time{font-size:46px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:1px;}
+  .ring .num .hint{font-size:12px; color:var(--muted); margin-top:2px; font-weight:600;}
+  .ring.ended .num .time{color:var(--red); animation:pulse .8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .controls{display:flex; gap:10px; margin-top:12px;}
+  .controls .btn{margin:0;}
+  .controls .btn.flex{flex:1;}
+  .ctlrow{display:flex; gap:10px; margin-top:10px;}
+  .ctlrow .btn{margin:0; flex:1;}
+
+  /* reveal stepper */
+  .stepper{display:flex; align-items:center; justify-content:center; gap:18px; margin:10px 0 2px;}
+  .stepper button{width:54px; height:54px; border-radius:14px; background:var(--ink); color:#fff; font-size:28px; font-weight:700; line-height:1; box-shadow:0 3px 0 #000;}
+  .stepper button:active{transform:translateY(2px); box-shadow:0 1px 0 #000;}
+  .stepper .count{font-size:44px; font-weight:700; min-width:54px; text-align:center; font-variant-numeric:tabular-nums; color:var(--red);}
+  .field{width:100%; font-family:inherit; font-size:15px; padding:12px; border:1.5px solid var(--line); border-radius:12px; background:#fff; resize:vertical; min-height:64px; margin-top:4px;}
+
+  /* done */
+  .verdict{text-align:center; padding:18px 16px; border-radius:18px; border:1.5px solid var(--line); background:var(--paper2); margin:6px 0 12px;}
+  .verdict .big{font-family:'Caveat',cursive; font-size:40px; line-height:1; margin:6px 0;}
+  .verdict .score{font-size:15px; color:var(--muted);}
+  .statline{display:flex; justify-content:space-around; text-align:center; margin:14px 0;}
+  .statline .s .n{font-size:28px; font-weight:700;}
+  .statline .s .l{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600;}
+  .echo{font-family:'Caveat',cursive; font-size:24px; line-height:1.25; text-align:center; color:var(--ink); margin:6px 12px 14px;}
+
+  footer{text-align:center; color:var(--muted); font-size:11.5px; margin-top:22px; line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== ACCUEIL ===================== -->
+  <section id="screen-home">
+    <div class="kicker">Carte de mission · dessin</div>
+    <h1>Réhabilitation</h1>
+    <p class="sub">Un bâtiment est accusé. Moche, vieux, bon à raser : ton cerveau a déjà tranché en une demi-seconde. Tu vas instruire le procès en trois passes et découvrir que l'accusation mentait.</p>
+
+    <div class="frame">
+      <p><b>Tu joues trois rôles.</b></p>
+      <p>Le <b>témoin</b> (ce que tu ressens, V1), le <b>procureur</b> (le cliché, V2), puis l'<b>enquêteur</b> qui trouve les preuves (les formes réelles, V3). La 3ème vision, c'est le verdict.</p>
+    </div>
+
+    <div class="frame">
+      <div class="rule"><b>1</b><span>Le chrono décide, pas toi. Quand ça sonne, tu lâches le crayon, même au milieu d'un trait.</span></div>
+      <div class="rule"><b>2</b><span>On n'efface rien, on n'arrache rien. Carnet daté. Les ratés sont des pièces à conviction.</span></div>
+      <div class="rule"><b>3</b><span>Une seule consigne par passe. Jamais deux choses à gérer en même temps.</span></div>
+    </div>
+
+    <div class="die" id="home-twist">
+      <div class="lab">Dé du jour · le grain de hasard</div>
+      <div class="val" id="twist-val">Tape « Lancer le dé » pour tirer la contrainte de la séance.</div>
+    </div>
+    <button class="btn ghost" id="roll-twist">Lancer le dé du jour</button>
+
+    <button class="btn" id="start-session">Commencer le procès &nbsp;&rarr;</button>
+
+    <details>
+      <summary>Avant la séance · La chasse au bâtiment <span class="chev">&rsaquo;</span></summary>
+      <div class="body">
+        <p>Pendant une balade que tu fais déjà. Téléphone en main, 15 min.</p>
+        <p><b>Ne choisis pas le beau. Choisis celui qui te dégoûte</b>, celui sur lequel ton œil glisse. Plus le cliché est fort, plus le procès sera spectaculaire.</p>
+        <div class="die" id="walk-die" style="margin-top:12px;">
+          <div class="lab">Règle de marche · tire au sort</div>
+          <div class="val" id="walk-val">Tape pour tirer une règle qui rend la balade imprévisible.</div>
+        </div>
+        <button class="btn ghost small" id="roll-walk">Tirer une règle de marche</button>
+        <ol>
+          <li>3 photos : de face, en biais, un détail.</li>
+          <li>Une photo depuis un point de vue impossible (accroupi en contre-plongée, bras tendu vers le haut).</li>
+          <li>Note l'adresse.</li>
+          <li>Fais son « avis de recherche » : photo, le nom que tu lui donnes, son crime.</li>
+        </ol>
+        <p style="color:var(--muted); margin-top:10px;">Crochet projet 1 : avec l'adresse, tu pourras voir DVF (prix réels) et le Géoportail de l'urbanisme (ce que le PLU autorise). Même marche que le sourcing d'un promoteur.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Après la séance · Le verdict au calque <span class="chev">&rsaquo;</span></summary>
+      <div class="body">
+        <p>Quand tu auras du calque. Pose-le sur la passe 3 (le bâtiment vrai) et dessine <b>seulement des flèches</b>, les vecteurs de transformation.</p>
+        <p><b>Trois flèches, pas une de plus.</b> Garder (vert, épais, sur ce qui reste : le carbone évité). Retirer (fin). Ajouter (le geste neuf : une ouverture, une toiture, un usage).</p>
+        <p>Le verdict n'est pas un milieu mou entre l'accusation et les preuves. C'est le trajet de l'un à l'autre. La 3ème vision en mouvement.</p>
+        <p style="color:var(--muted)">Empile les couches, photographie à contre-jour sur une vitre : ta première planche de book.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===================== SEANCE ===================== -->
+  <section id="screen-session" class="hidden">
+    <div class="topbar">
+      <span class="step-no" id="step-no">Étape 1 / 6</span>
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <div class="die" id="session-twist" style="margin:6px 0 12px; padding:9px 13px;">
+      <div class="lab">Contrainte du jour</div>
+      <div class="val" id="session-twist-val" style="font-size:13.5px; min-height:0;"></div>
+    </div>
+
+    <div class="stepcard" id="stepcard">
+      <div class="role" id="role">Rôle</div>
+      <h2 id="title">Titre</h2>
+
+      <div class="timerwrap">
+        <div class="ring" id="ring">
+          <svg width="172" height="172">
+            <circle cx="86" cy="86" r="76" fill="none" stroke="#e3d6b6" stroke-width="11"/>
+            <circle id="ring-prog" cx="86" cy="86" r="76" fill="none" stroke="var(--accent,#999)" stroke-width="11" stroke-linecap="round"/>
+          </svg>
+          <div class="num">
+            <div class="time" id="time">00:00</div>
+            <div class="hint" id="hint">prêt</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn flex dark" id="startpause">Démarrer</button>
+      </div>
+
+      <div class="block geste"><div class="t">Le geste</div><div class="c" id="geste"></div></div>
+      <div class="block"><div class="t">Le déclencheur</div><div class="c" id="why"></div></div>
+
+      <!-- reveal extras -->
+      <div id="reveal-extra" class="hidden">
+        <div class="block"><div class="t">Charges abandonnées (ronds rouges)</div></div>
+        <div class="stepper">
+          <button id="minus">&minus;</button>
+          <span class="count" id="charges">0</span>
+          <button id="plus">+</button>
+        </div>
+      </div>
+
+      <!-- honneur extras -->
+      <div id="honor-extra" class="hidden">
+        <div class="block"><div class="t">La phrase de la défense</div></div>
+        <textarea class="field" id="sentence" placeholder="Ce bâtiment mérite de rester parce que…"></textarea>
+      </div>
+    </div>
+
+    <div class="ctlrow">
+      <button class="btn ghost" id="prev">&larr; Précédent</button>
+      <button class="btn" id="next">Suivant &rarr;</button>
+    </div>
+    <button class="btn ghost" id="quit" style="margin-top:8px;">Quitter la séance</button>
+  </section>
+
+  <!-- ===================== FIN ===================== -->
+  <section id="screen-done" class="hidden">
+    <div class="kicker">Verdict rendu</div>
+    <h1 style="font-size:46px;">Réhabilité</h1>
+    <div class="verdict">
+      <div class="score">Charges abandonnées</div>
+      <div class="big" id="v-title">—</div>
+      <div class="score" id="v-text"></div>
+    </div>
+
+    <div class="statline">
+      <div class="s"><div class="n" id="s-charges">0</div><div class="l">cette séance</div></div>
+      <div class="s"><div class="n" id="s-best">0</div><div class="l">record</div></div>
+      <div class="s"><div class="n" id="s-count">0</div><div class="l">séances</div></div>
+    </div>
+
+    <div class="echo" id="echo"></div>
+
+    <div class="frame">
+      <p style="font-weight:600;">La suite, au calque : le verdict.</p>
+      <p>Pose le calque sur ta passe 3, trois flèches maximum : garder, retirer, ajouter. C'est ta planche de book, et la graine de ton pitch projet 1.</p>
+    </div>
+
+    <button class="btn green" id="again">Nouvelle séance &nbsp;&rarr;</button>
+    <button class="btn ghost" id="home">Retour à l'accueil</button>
+  </section>
+
+  <footer>
+    Réhabilitation · ouvre-moi en plein écran, garde le son ou les vibrations actives.<br>
+    Le crayon ne sert pas le projet à côté. Il est le projet.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STEPS = [
+    { key:"chauffe", role:"Échauffement", title:"La main qui désobéit", dur:120, color:"var(--green)",
+      geste:"30 s avec ta mauvaise main. Puis 30 s yeux fermés, le bâtiment de mémoire.",
+      why:"On débloque le poignet et on tue la peur de mal faire, avant même de commencer." },
+    { key:"p1", role:"Passe 1 · Le témoin", title:"Le ressenti, contour aveugle", dur:60, color:"var(--ochre)",
+      geste:"Œil verrouillé sur la photo. Une seule ligne, crayon jamais levé. Tu ne regardes JAMAIS ta feuille.",
+      why:"Impossible à anticiper, et la révélation est comique. À la fin, écris UN mot : ton ressenti. C'est ta V1." },
+    { key:"p2", role:"Passe 2 · L'accusation", title:"Le cliché, dessine comme un enfant", dur:60, color:"var(--red)",
+      geste:"Carré, toit triangle, une porte, quatre fenêtres alignées. Tu as le DROIT de faire nul, c'est la consigne.",
+      why:"La permission de faire le cliché désarme l'ego et fige le mensonge à démonter. C'est ta V2." },
+    { key:"p3", role:"Passe 3 · Les preuves", title:"Les formes réelles, photo retournée", dur:210, color:"var(--blue)",
+      geste:"Fais pivoter la photo à 180° dans ton téléphone. Dessine à l'envers. Interdit de nommer : « trapèze sombre », pas « fenêtre ».",
+      why:"À l'envers, le cerveau symbolique lâche prise. Concentration totale. C'est ta V3, les preuves." },
+    { key:"reveal", role:"La révélation", title:"Les charges abandonnées", dur:150, color:"var(--red)", isReveal:true,
+      geste:"Page à l'endroit. Pose la P2 (accusation) à côté de la P3 (preuves). Entoure en ROUGE chaque endroit où le réel bat ton cliché.",
+      why:"Chaque rond est une charge qui tombe. Le total mesure ton biais. Compte-les ci-dessous." },
+    { key:"honneur", role:"Tour d'honneur", title:"La défense gagne", dur:90, color:"var(--green)", isHonor:true,
+      geste:"Redessine en grand la forme qui t'a le plus surpris. Puis écris la phrase ci-dessous.",
+      why:"Cette phrase est la graine de ton pitch projet 1." }
+  ];
+
+  var TWISTS = [
+    "Tiens le crayon par le tout bout, jamais près de la mine.",
+    "Change de couleur à chaque passe.",
+    "Debout, carnet à la main, pas de table.",
+    "Trois respirations lentes avant chaque passe.",
+    "Dessine sur une page déjà tachée ou froissée. Zéro page blanche intimidante.",
+    "Trait épais seulement : feutre ou crayon gras.",
+    "Fredonne pendant que tu dessines, ça occupe le cerveau bavard.",
+    "Crayon dans la main, coude qui ne touche jamais la table."
+  ];
+
+  var WALKS = [
+    "Tourne à gauche à chaque commerce que tu croises.",
+    "Arrête-toi au 3ème bâtiment qui te fait tiquer.",
+    "Suis la première personne en rouge, sur deux rues.",
+    "Compte 60 pas, lève les yeux : c'est ton secteur.",
+    "Va droit vers le bâtiment le plus laid visible depuis ton départ."
+  ];
+
+  // ---------- state ----------
+  var idx = 0, remaining = 0, timerId = null, running = false, ended = false;
+  var twist = "", charges = 0, sentence = "";
+  var RING = 2 * Math.PI * 76;
+
+  // ---------- helpers ----------
+  function $(id){ return document.getElementById(id); }
+  function show(id){
+    ["screen-home","screen-session","screen-done"].forEach(function(s){
+      $(s).classList.toggle("hidden", s !== id);
+    });
+    window.scrollTo(0,0);
+  }
+  function fmt(s){
+    var m = Math.floor(s/60), r = s%60;
+    return (m<10?"0":"")+m+":"+(r<10?"0":"")+r;
+  }
+  function pick(arr, avoid){
+    if(arr.length<2) return arr[0];
+    var v;
+    do { v = arr[Math.floor(Math.random()*arr.length)]; } while(v===avoid);
+    return v;
+  }
+  function beep(){
+    try{
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      var ctx = new Ctx();
+      [880, 660, 990].forEach(function(f,i){
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = f; o.type = "sine";
+        o.connect(g); g.connect(ctx.destination);
+        var t = ctx.currentTime + i*0.18;
+        g.gain.setValueAtTime(0.001, t);
+        g.gain.exponentialRampToValueAtTime(0.25, t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t+0.16);
+        o.start(t); o.stop(t+0.18);
+      });
+    }catch(e){}
+    if(navigator.vibrate) navigator.vibrate([220,90,220]);
+  }
+
+  // ---------- ring ----------
+  var prog = $("ring-prog");
+  prog.setAttribute("stroke-dasharray", RING.toFixed(2));
+  function drawRing(){
+    var step = STEPS[idx];
+    var frac = step.dur ? (remaining/step.dur) : 0;
+    prog.setAttribute("stroke-dashoffset", (RING*(1-frac)).toFixed(2));
+  }
+
+  // ---------- render step ----------
+  function renderStep(){
+    var step = STEPS[idx];
+    document.documentElement.style.setProperty("--accent", step.color);
+    $("stepcard").style.setProperty("--accent", step.color);
+    $("role").style.color = step.color;
+    $("role").textContent = step.role;
+    $("title").textContent = step.title;
+    $("geste").textContent = step.geste;
+    $("why").textContent = step.why;
+    $("step-no").textContent = "Étape " + (idx+1) + " / " + STEPS.length;
+
+    // dots
+    var d = "";
+    for(var i=0;i<STEPS.length;i++){
+      var cls = "dot" + (i<idx?" done":"") + (i===idx?" on":"");
+      d += '<span class="'+cls+'"></span>';
+    }
+    $("dots").innerHTML = d;
+
+    // extras
+    $("reveal-extra").classList.toggle("hidden", !step.isReveal);
+    $("honor-extra").classList.toggle("hidden", !step.isHonor);
+    if(step.isReveal) $("charges").textContent = charges;
+    if(step.isHonor) $("sentence").value = sentence;
+
+    // next label
+    $("next").textContent = (idx === STEPS.length-1) ? "Rendre le verdict ✓" : "Suivant →";
+    $("prev").style.visibility = (idx===0) ? "hidden" : "visible";
+
+    // reset timer for this step
+    stopTimer();
+    remaining = step.dur;
+    ended = false;
+    $("ring").classList.remove("ended");
+    $("time").textContent = fmt(remaining);
+    $("hint").textContent = "prêt";
+    $("startpause").textContent = "Démarrer";
+    drawRing();
+  }
+
+  // ---------- timer ----------
+  function tick(){
+    remaining--;
+    if(remaining <= 0){
+      remaining = 0;
+      $("time").textContent = fmt(0);
+      drawRing();
+      stopTimer();
+      ended = true;
+      $("ring").classList.add("ended");
+      $("hint").textContent = "stop, lâche le crayon";
+      $("startpause").textContent = "Démarrer";
+      beep();
+      return;
+    }
+    $("time").textContent = fmt(remaining);
+    $("hint").textContent = "en cours";
+    drawRing();
+  }
+  function startTimer(){
+    if(remaining<=0){ remaining = STEPS[idx].dur; ended=false; $("ring").classList.remove("ended"); }
+    running = true;
+    $("startpause").textContent = "Pause";
+    $("hint").textContent = "en cours";
+    timerId = setInterval(tick, 1000);
+  }
+  function stopTimer(){
+    running = false;
+    if(timerId){ clearInterval(timerId); timerId = null; }
+  }
+  function toggleTimer(){
+    if(running){ stopTimer(); $("startpause").textContent = "Reprendre"; $("hint").textContent="en pause"; }
+    else { startTimer(); }
+  }
+
+  // ---------- navigation ----------
+  function goNext(){
+    if(STEPS[idx].isHonor) sentence = $("sentence").value;
+    if(idx === STEPS.length-1){ finish(); return; }
+    idx++; renderStep();
+  }
+  function goPrev(){
+    if(STEPS[idx].isHonor) sentence = $("sentence").value;
+    if(idx===0) return;
+    idx--; renderStep();
+  }
+
+  function startSession(){
+    if(!twist) rollTwist(true);
+    $("session-twist-val").textContent = twist;
+    idx = 0; charges = 0; sentence = "";
+    show("screen-session");
+    renderStep();
+  }
+
+  // ---------- finish / verdict ----------
+  function finish(){
+    stopTimer();
+    sentence = $("sentence").value || "";
+    var best = parseInt(localStorage.getItem("rehab_best")||"0", 10);
+    var count = parseInt(localStorage.getItem("rehab_count")||"0", 10) + 1;
+    if(charges > best) best = charges;
+    localStorage.setItem("rehab_best", best);
+    localStorage.setItem("rehab_count", count);
+
+    var title, text;
+    if(charges <= 2){
+      title = "Procès serré";
+      text = "L'accusation a presque tenu. Ou tu n'as pas assez creusé la passe 3. La prochaine fois, retourne la photo et ralentis.";
+    } else if(charges <= 6){
+      title = "Accusation démontée";
+      text = "Ton cliché a pris cher. C'est le bon écart : tu as vu ce que ton cerveau niait.";
+    } else {
+      title = "Réhabilitation totale";
+      text = "Ton œil a écrasé ton préjugé. Garde cette planche, c'est une preuve rare.";
+    }
+    $("v-title").textContent = title;
+    $("v-text").textContent = text;
+    $("s-charges").textContent = charges;
+    $("s-best").textContent = best;
+    $("s-count").textContent = count;
+    $("echo").textContent = sentence ? ("« " + sentence + " »") : "Tu n'as pas écrit la phrase de la défense. Reviens la noter.";
+    show("screen-done");
+  }
+
+  // ---------- dice ----------
+  function rollTwist(silent){
+    twist = pick(TWISTS, twist);
+    $("twist-val").textContent = twist;
+    if(!silent){
+      $("home-twist").classList.remove("shake"); void $("home-twist").offsetWidth;
+      $("home-twist").classList.add("shake");
+    }
+  }
+  function rollWalk(){
+    var w = pick(WALKS, $("walk-val").dataset.cur);
+    $("walk-val").dataset.cur = w;
+    $("walk-val").textContent = w;
+    $("walk-die").classList.remove("shake"); void $("walk-die").offsetWidth;
+    $("walk-die").classList.add("shake");
+  }
+
+  // ---------- wire up ----------
+  $("roll-twist").addEventListener("click", function(){ rollTwist(false); });
+  $("roll-walk").addEventListener("click", rollWalk);
+  $("start-session").addEventListener("click", startSession);
+  $("startpause").addEventListener("click", toggleTimer);
+  $("next").addEventListener("click", goNext);
+  $("prev").addEventListener("click", goPrev);
+  $("quit").addEventListener("click", function(){ stopTimer(); show("screen-home"); });
+  $("minus").addEventListener("click", function(){ if(charges>0){charges--; $("charges").textContent=charges;} });
+  $("plus").addEventListener("click", function(){ charges++; $("charges").textContent=charges; });
+  $("again").addEventListener("click", startSession);
+  $("home").addEventListener("click", function(){ show("screen-home"); });
+
+  // init stats on home (optional small touch)
+  show("screen-home");
+})();
+</script>
+</body>
+</html>
